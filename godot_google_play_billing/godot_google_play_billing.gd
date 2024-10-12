@@ -1,17 +1,19 @@
 @tool
 extends EditorPlugin
 
-var plugin: AndroidExportPlugin = null
+var _export_plugin: AndroidExportPlugin = null
+
+var pluginName = "[GodotGooglePlayBilling]"
 
 func _enter_tree() -> void:
-	plugin = AndroidExportPlugin.new()
-	add_autoload_singleton("GooglePlayBilling", "res://addons/godot_google_play_billing/autoload/billing.gd")
-	add_export_plugin(plugin)
+	_export_plugin = AndroidExportPlugin.new()
+	add_export_plugin(_export_plugin)
+	add_autoload_singleton("GodotGooglePlayBilling", "res://addons/godot_google_play_billing/autoload/billing.gd")
 
 func _exit_tree() -> void:
-	remove_autoload_singleton("GooglePlayBilling")
-	remove_export_plugin(plugin)
-	plugin = null
+	remove_export_plugin(_export_plugin)
+	remove_autoload_singleton("GodotGooglePlayBilling")
+	_export_plugin = null
 
 class AndroidExportPlugin extends EditorExportPlugin:
 	var _plugin_name: String = "GodotGooglePlayBilling"
@@ -22,10 +24,13 @@ class AndroidExportPlugin extends EditorExportPlugin:
 		return false
 
 	func _get_android_libraries(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
-		return PackedStringArray(["res://addons/godot_google_play_billing/GodotGooglePlayBilling.aar"])
+		if debug:
+			return PackedStringArray(["res://addons/godot_google_play_billing/GodotGooglePlayBilling-debug.aar"])
+		else:
+			return PackedStringArray(["res://addons/godot_google_play_billing/GodotGooglePlayBilling-release.aar"])
 
 	func _get_android_dependencies(platform: EditorExportPlatform, debug: bool) -> PackedStringArray:
-		return PackedStringArray(['com.android.billingclient:billing:7.0.0'])
+		return PackedStringArray(['com.android.billingclient:billing:7.1.1'])
 
 	func _get_name() -> String:
 		return _plugin_name
