@@ -93,7 +93,7 @@ class GodotGooglePlayBilling(godot: Godot) :
 
         // Purchases
         signals.add(SignalInfo("purchases_updated", Int::class.javaObjectType, String::class.javaObjectType, Object::class.javaObjectType)) // Debug message, Error code, purchases[]
-        signals.add(SignalInfo("purchase_error", Int::class.javaObjectType, String::class.javaObjectType)) // Debug message, Error code
+        signals.add(SignalInfo("purchase_error", Int::class.javaObjectType, String::class.javaObjectType)) // Response code, Debug message
 
         // Queries
         signals.add(SignalInfo("query_purchases", Int::class.javaObjectType, String::class.javaObjectType, Object::class.javaObjectType))
@@ -147,9 +147,8 @@ class GodotGooglePlayBilling(godot: Godot) :
         if (!productDetailsHashMap.containsKey(productId)) {
             emitSignal(
                 "purchase_error",
-                productId,
-                "Product ID does not exist.",
-                BillingClient.BillingResponseCode.ERROR
+                BillingClient.BillingResponseCode.ERROR,
+                "Product $productId does not exist. Have you called queryProductDetails?"
             )
             return
         }
@@ -159,8 +158,8 @@ class GodotGooglePlayBilling(godot: Godot) :
         if (activity == null) {
             emitSignal(
                 "purchase_error",
-                "Not connected to Google Play Billing services",
-                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED
+                BillingClient.BillingResponseCode.SERVICE_DISCONNECTED,
+                "Not connected to Google Play Billing services"
             )
             return
         }
@@ -192,7 +191,11 @@ class GodotGooglePlayBilling(godot: Godot) :
 
         if (billingResult.responseCode != BillingClient.BillingResponseCode.OK) {
             this.log("Purchase Error! " + billingResult.responseCode + " " + billingResult.debugMessage);
-            emitSignal("purchase_error", billingResult.debugMessage, billingResult.responseCode);
+            emitSignal(
+                "purchase_error",
+                billingResult.responseCode,
+                billingResult.debugMessage
+            );
         }
     }
 
